@@ -100,7 +100,7 @@ public class NbcSsoClientApplication {
     }
 
 
-    @Scheduled(timeUnit = TimeUnit.SECONDS, initialDelay = 5)
+    @Scheduled(timeUnit = TimeUnit.SECONDS, fixedDelay = 5)
     public void getTokensForTestUsers() {
 
         String nbcAdminUsername = "nbc-admin";
