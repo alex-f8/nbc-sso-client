@@ -120,6 +120,7 @@ public class NbcSsoClientApplication {
         String clientSecret = "AEZRbZOK7zhPZF2sC11ihHBqxwxv6eiI";
         String grantTypePassword = "password";
 
+        System.out.println("\n\n\n\n");
         for (Map<String, String> user : List.of(admin, branchOperator)) {
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.set("username", user.get("username"));
@@ -137,7 +138,7 @@ public class NbcSsoClientApplication {
 
             ResponseEntity<TokenDTO> response2 = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.POST, requestEntity, TokenDTO.class);
 
-            System.out.println("---------------");
+
             System.out.println("user : " + user.get("username"));
             System.out.println(response2.getStatusCode());
             System.out.println(response2.getBody().getAccessToken());
