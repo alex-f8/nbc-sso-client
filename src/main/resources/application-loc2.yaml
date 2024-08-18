@@ -1,0 +1,5 @@
+keycloak-client:
+  issue-uri: http://localhost:9999/realms/test/protocol/openid-connect/token
+  realm: test
+  client-id: test-client
+  client-secret: BZ3fcL3IdrJgnbaJuIX2QLfefeJVlngE

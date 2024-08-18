@@ -2,23 +2,15 @@ package com.example.nbc_sso_client;
 
 import com.example.nbc_sso_client.dto.TokenDTO;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,11 +18,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+//@Profile("loc2")
 @EnableScheduling
 @RestController
 @RequestMapping
 @SpringBootApplication
 public class NbcSsoClientApplication {
+    @Value("${keycloak-client.issue-uri}")
+    private String issueUri;
+
+    @Value("${keycloak-client.realm}")
+    private String realm;
+
+    @Value("${keycloak-client.client-id}")
+    private String clientId;
+
+    @Value("${keycloak-client.client-secret}")
+    private String clientSecret;
+
+
     private RestTemplate restTemplate;
 
     public static void main(String[] args) {
@@ -65,11 +71,11 @@ public class NbcSsoClientApplication {
 
     private TokenDTO getTokenDTO(String username, String password) {
         var uriBuilder = UriComponentsBuilder
-                .fromHttpUrl("http://localhost:9999/realms/nbc-test/protocol/openid-connect/token")
+                .fromHttpUrl(this.issueUri)
                 .build();
 
-        String clientId = "nbc-test-client";
-        String clientSecret = "AEZRbZOK7zhPZF2sC11ihHBqxwxv6eiI";
+        String clientId = this.clientId;
+        String clientSecret = this.clientSecret;
         String grantTypePassword = "password";
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
@@ -100,8 +106,9 @@ public class NbcSsoClientApplication {
     }
 
 
-    @Scheduled(timeUnit = TimeUnit.SECONDS, fixedDelay = 5)
+    @Scheduled(timeUnit = TimeUnit.SECONDS, fixedDelay = 20)
     public void getTokensForTestUsers() {
+        System.out.printf("%s %s %s %n", issueUri, clientId, clientSecret);
 
         String nbcAdminUsername = "nbc-admin";
         String nbcAdminPass = "123";
@@ -110,14 +117,14 @@ public class NbcSsoClientApplication {
         String nbcBOPass = "123";
 
         Map<String, String> admin = Map.of("username", nbcAdminUsername, "password", nbcAdminPass);
-        Map<String, String> branchOperator = Map.of("username", nbcBOUsername, "password", nbcAdminPass);
+        Map<String, String> branchOperator = Map.of("username", nbcBOUsername, "password", nbcBOPass);
 
         var uriBuilder = UriComponentsBuilder
-                .fromHttpUrl("http://localhost:9999/realms/nbc-test/protocol/openid-connect/token")
+                .fromHttpUrl(this.issueUri)
                 .build();
 
-        String clientId = "nbc-test-client";
-        String clientSecret = "AEZRbZOK7zhPZF2sC11ihHBqxwxv6eiI";
+        String clientId = this.clientId;
+        String clientSecret = this.clientSecret;
         String grantTypePassword = "password";
 
         System.out.println("\n\n\n\n");
