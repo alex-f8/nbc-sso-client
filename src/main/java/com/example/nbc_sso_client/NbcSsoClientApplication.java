@@ -5,18 +5,25 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 //@Profile("loc2")
 @EnableScheduling
@@ -48,24 +55,11 @@ public class NbcSsoClientApplication {
         this.restTemplate = new RestTemplate();
     }
 
-    @GetMapping("get-token/{client}")
+    @GetMapping("get-token")
     @ResponseStatus(HttpStatus.OK)
-    public String getToken(@PathVariable(value = "client") String client) {
+    public Object getToken() {
 
-        String username = "office-admin";
-        String password = "123";
-
-        String usernameService = "service";
-        String passwordService = "123";
-
-        TokenDTO tokenDTO;
-
-        if (client.equals("service")) {
-            tokenDTO = getTokenDTO(usernameService, passwordService);
-        } else {
-            tokenDTO = getTokenDTO(username, password);
-        }
-        return tokenDTO.getAccessToken();
+        return getTokensForTestUsers();
     }
 
 
@@ -106,8 +100,8 @@ public class NbcSsoClientApplication {
     }
 
 
-    @Scheduled(timeUnit = TimeUnit.SECONDS, fixedDelay = 20)
-    public void getTokensForTestUsers() {
+    //    @Scheduled(timeUnit = TimeUnit.SECONDS, fixedDelay = 300)
+    public Map<String, String> getTokensForTestUsers() {
         System.out.printf("%s %s %s %n", issueUri, clientId, clientSecret);
 
         String nbcAdminUsername = "nbc-admin";
@@ -128,6 +122,9 @@ public class NbcSsoClientApplication {
         String grantTypePassword = "password";
 
         System.out.println("\n\n\n\n");
+
+        Map<String, String> response = new HashMap<>();
+
         for (Map<String, String> user : List.of(admin, branchOperator)) {
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.set("username", user.get("username"));
@@ -146,11 +143,19 @@ public class NbcSsoClientApplication {
             ResponseEntity<TokenDTO> response2 = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.POST, requestEntity, TokenDTO.class);
 
 
+            response.put(
+                    user.get("username"),
+                    response2.getBody().getAccessToken()
+            );
+
             System.out.println("user : " + user.get("username"));
             System.out.println(response2.getStatusCode());
             System.out.println(response2.getBody().getAccessToken());
             System.out.println("---------------");
+
         }
+
+        return response;
     }
 
 }

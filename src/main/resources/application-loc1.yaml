@@ -1,5 +1,5 @@
 keycloak-client:
   issue-uri: http://localhost:9999/realms/nbc-test/protocol/openid-connect/token
   realm: nbc-test
-  client-id: nbc-test-client
-  client-secret: AEZRbZOK7zhPZF2sC11ihHBqxwxv6eiI
+  client-id: nbc-user-client-test
+  client-secret: OtX4rpsxCxYlGw2Hzw8VwL7n0kE3QqWP
